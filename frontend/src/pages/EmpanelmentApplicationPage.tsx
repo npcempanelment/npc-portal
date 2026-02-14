@@ -10,10 +10,13 @@
  * On submit, creates/updates profile + application with auto-screening per Empanelment AI §2.3.
  */
 
-import React, { useState, useEffect, useRef, type FormEvent } from 'react';
+import React, { useState, useEffect, useRef, useMemo, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { getDomains, getOffices, getProfile, submitEmpanelmentFull, uploadDocument } from '../services/api';
 import ScreeningResultCard from '../components/ScreeningResultCard';
+import { usePageTitle } from '../hooks/usePageTitle';
+import { computeAge, computeTotalExperience, determineHighestQualification } from '../utils/clientScreening';
 import type { Domain, NpcOffice, EmpanelmentArea, ScreeningResult, Certification } from '../types';
 
 const BG_TYPE_OPTIONS: { value: string; label: string }[] = [
@@ -54,6 +57,7 @@ interface CertEntry extends Certification {
 }
 
 export default function EmpanelmentApplicationPage() {
+  usePageTitle('Apply for Empanelment');
   const { user } = useAuth();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [offices, setOffices] = useState<NpcOffice[]>([]);
@@ -159,6 +163,15 @@ export default function EmpanelmentApplicationPage() {
 
   const selectedDomain = domains.find(d => d.id === domainId);
 
+  // Profile preview (computed from form data)
+  const profilePreview = useMemo(() => {
+    const age = computeAge(dob);
+    const totalExperience = computeTotalExperience(experiences.map(e => ({ startDate: e.startDate, endDate: e.endDate, isCurrent: e.isCurrent })));
+    const highestQualification = determineHighestQualification(educations.map(e => ({ degree: e.degree, isDoctorate: e.isDoctorate, isPostGraduation: e.isPostGraduation })));
+    const qualLabels: Record<string, string> = { CLASS_XII: 'Class XII', ITI: 'ITI / Diploma', GRADUATE: 'Graduate', LAW: 'Law Graduate', POST_GRADUATE: 'Post Graduate', PROFESSIONAL: 'Professional Degree', DOCTORATE: 'Doctorate' };
+    return { age, totalExperience, highestQualification, qualificationLabel: qualLabels[highestQualification] || highestQualification };
+  }, [dob, educations, experiences]);
+
   // helpers
   function updateEdu(idx: number, f: string, v: any) { const u = [...educations]; (u[idx] as any)[f] = v; setEducations(u); }
   function updateExp(idx: number, f: string, v: any) { const u = [...experiences]; (u[idx] as any)[f] = v; setExperiences(u); }
@@ -232,7 +245,7 @@ export default function EmpanelmentApplicationPage() {
   }
 
   if (!user) return <div style={S.container}><h2>Apply for Empanelment</h2><div style={S.error}>Please <a href="/login">login</a> or <a href="/register">register</a> to apply.</div></div>;
-  if (profileLoading) return <div style={S.container}><p>Loading your profile...</p></div>;
+  if (profileLoading) return <div style={S.container}><p><span className="spinner" /> Loading your profile...</p></div>;
 
   if (submitted && screeningResult) {
     return (
@@ -240,6 +253,11 @@ export default function EmpanelmentApplicationPage() {
         <h2 style={{ color: '#1a237e' }}>Application Submitted Successfully</h2>
         <ScreeningResultCard type="empanelment" empanelmentResult={screeningResult} />
         <p style={{ marginTop: 16, color: '#555' }}>Your application has been submitted for Screening Committee review.</p>
+        <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' as const }}>
+          <Link to="/dashboard" style={S.navLink}>View My Applications</Link>
+          <Link to="/adverts" style={{ ...S.navLink, background: '#fff', color: '#1a237e', border: '1px solid #1a237e' }}>Browse Open Positions</Link>
+          <Link to="/dashboard" style={{ ...S.navLink, background: '#f5f5f5', color: '#333', border: '1px solid #ccc' }}>Go to Dashboard</Link>
+        </div>
       </div>
     );
   }
@@ -445,7 +463,29 @@ export default function EmpanelmentApplicationPage() {
             <fieldset style={S.fieldset}>
               <legend style={S.legend}>Preferred NPC Office(s) *</legend>
               <div className="checkbox-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 4 }}>
-                {offices.map(o => <label key={o.id} style={S.checkLabel}><input type="checkbox" checked={selectedOffices.includes(o.id)} onChange={() => toggleOffice(o.id)} />{o.name} ({o.city})</label>)}
+                {offices.map(o => <label key={o.id} style={S.checkLabel}><input type="checkbox" checked={selectedOffices.includes(o.id)} onChange={() => toggleOffice(o.id)} />{o.city}</label>)}
+              </div>
+            </fieldset>
+
+            {/* Profile Preview — computed from form data */}
+            <fieldset style={{ ...S.fieldset, borderColor: '#1a237e', borderWidth: 2 }}>
+              <legend style={{ ...S.legend, color: '#1a237e' }}>Your Profile Summary (Auto-Computed)</legend>
+              <p style={{ fontSize: '0.85rem', color: '#555', marginTop: 0, marginBottom: 12 }}>Review your computed profile values before submitting. If anything looks incorrect, go back and update your details.</p>
+              <div className="screening-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                <div style={{ background: '#e8eaf6', padding: 14, borderRadius: 8, textAlign: 'center' as const }}>
+                  <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4 }}>Age</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a237e' }}>{profilePreview.age || '—'}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#888' }}>years</div>
+                </div>
+                <div style={{ background: '#e8eaf6', padding: 14, borderRadius: 8, textAlign: 'center' as const }}>
+                  <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4 }}>Total Experience</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a237e' }}>{profilePreview.totalExperience || '—'}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#888' }}>years</div>
+                </div>
+                <div style={{ background: '#e8eaf6', padding: 14, borderRadius: 8, textAlign: 'center' as const }}>
+                  <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4 }}>Highest Qualification</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#1a237e' }}>{profilePreview.qualificationLabel}</div>
+                </div>
               </div>
             </fieldset>
 
@@ -479,7 +519,7 @@ export default function EmpanelmentApplicationPage() {
           <div style={{ flex: 1 }} />
           {step < 5
             ? <button type="button" onClick={goNext} style={S.nextBtn}>Next</button>
-            : <button type="submit" disabled={loading} style={S.submitBtn}>{loading ? 'Submitting...' : 'Submit Application'}</button>
+            : <button type="submit" disabled={loading} style={S.submitBtn}>{loading ? <><span className="spinner spinner-light" /> Submitting...</> : 'Submit Application'}</button>
           }
         </div>
       </form>
@@ -496,10 +536,10 @@ const S: Record<string, React.CSSProperties> = {
   fieldset: { border: '1px solid #ddd', borderRadius: 8, padding: '16px 20px', marginBottom: 20, background: '#fff' },
   legend: { fontWeight: 'bold', fontSize: '1rem', padding: '0 8px', color: '#1a237e' },
   row: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
-  label: { display: 'block', marginBottom: 12, fontSize: '0.9rem', fontWeight: 500 },
-  input: { display: 'block', width: '100%', padding: '8px 12px', marginTop: 4, border: '1px solid #ccc', borderRadius: 4, fontSize: '0.95rem', boxSizing: 'border-box' as const },
+  label: { display: 'block', marginBottom: 14, fontSize: '0.9rem', fontWeight: 500 },
+  input: { display: 'block', width: '100%', padding: '10px 12px', marginTop: 4, border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem', boxSizing: 'border-box' as const },
   checkRow: { display: 'flex', gap: 16, flexWrap: 'wrap' as const, marginTop: 8, alignItems: 'center' },
-  checkLabel: { display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.85rem' },
+  checkLabel: { display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' },
   entryBlock: { border: '1px solid #e0e0e0', borderRadius: 6, padding: 14, marginBottom: 12, background: '#fafafa' },
   addBtn: { background: '#e8eaf6', border: '1px solid #9fa8da', padding: '8px 18px', borderRadius: 4, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 },
   removeBtn: { background: '#ffebee', border: '1px solid #ef9a9a', padding: '8px 16px', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem', color: '#c62828' },
@@ -514,6 +554,7 @@ const S: Record<string, React.CSSProperties> = {
   error: { background: '#ffebee', color: '#c62828', padding: '10px 14px', borderRadius: 4, marginBottom: 16, fontSize: '0.9rem' },
   note: { background: '#fff3e0', padding: 12, borderRadius: 4, border: '1px solid #ffe0b2', fontSize: '0.9rem', marginBottom: 12 },
   hint: { fontSize: '0.85rem', color: '#666', margin: '0 0 12px' },
+  navLink: { display: 'inline-block', padding: '10px 24px', background: '#1a237e', color: '#fff', textDecoration: 'none', borderRadius: 6, fontSize: '0.95rem', fontWeight: 500 },
   th: { padding: '8px 10px', borderBottom: '2px solid #c5cae9' },
   td: { padding: '6px 10px', borderBottom: '1px solid #eee' },
 };
