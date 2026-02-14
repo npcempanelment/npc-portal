@@ -12,6 +12,7 @@ import * as profileCtrl from '../controllers/profile.controller';
 import * as empanelmentCtrl from '../controllers/empanelment.controller';
 import * as contractualCtrl from '../controllers/contractual.controller';
 import * as masterCtrl from '../controllers/master.controller';
+import * as reportsCtrl from '../controllers/reports.controller';
 
 const router = Router();
 
@@ -35,6 +36,11 @@ router.get('/master/adverts/:id', masterCtrl.getAdvertById);
 router.get('/admin/adverts', authenticate, authorize(UserRole.ADMIN, UserRole.DG), masterCtrl.getAllAdverts);
 router.post('/admin/adverts', authenticate, authorize(UserRole.ADMIN), masterCtrl.createAdvert);
 router.post('/admin/adverts/:id/publish', authenticate, authorize(UserRole.ADMIN), masterCtrl.publishAdvert);
+
+// ── Admin: reports ──
+router.get('/admin/reports/stats', authenticate, authorize(UserRole.ADMIN, UserRole.DG), reportsCtrl.getStats);
+router.get('/admin/reports/contractual-applications', authenticate, authorize(UserRole.ADMIN, UserRole.DG), reportsCtrl.getContractualApplicationsReport);
+router.get('/admin/reports/empanelment-applications', authenticate, authorize(UserRole.ADMIN, UserRole.DG), reportsCtrl.getEmpanelmentApplicationsReport);
 
 // ── Empanelment applications (with inline profile) ──
 router.post('/applications/empanelment', authenticate, authorize(UserRole.APPLICANT), empanelmentCtrl.createApplication);

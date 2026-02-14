@@ -132,6 +132,30 @@ export async function getMyContractualApplications(profileId: string) {
   return data.data;
 }
 
+// ── Admin: Reports ──
+export async function getReportStats() {
+  const { data } = await api.get('/admin/reports/stats');
+  return data.data;
+}
+
+export async function getContractualApplicationsReport() {
+  const { data } = await api.get('/admin/reports/contractual-applications');
+  return data.data;
+}
+
+export async function getEmpanelmentApplicationsReport() {
+  const { data } = await api.get('/admin/reports/empanelment-applications');
+  return data.data;
+}
+
+export function getContractualCsvUrl() {
+  return '/api/admin/reports/contractual-applications?format=csv';
+}
+
+export function getEmpanelmentCsvUrl() {
+  return '/api/admin/reports/empanelment-applications?format=csv';
+}
+
 // ── Committee ──
 export async function getScreeningPendingEmpanelment(page = 1) {
   const { data } = await api.get(`/committee/screening/empanelment/pending?page=${page}`);
