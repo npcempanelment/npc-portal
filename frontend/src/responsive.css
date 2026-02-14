@@ -1,0 +1,190 @@
+/* ── Global Mobile Responsive Overrides ── */
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+body { overflow-x: hidden; }
+
+/* All tables scroll horizontally on mobile */
+table { display: table; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Buttons minimum touch target */
+button, a.btn, [role="button"] { min-height: 36px; }
+
+/* ── Mobile: < 768px ── */
+@media (max-width: 768px) {
+  /* Header */
+  .app-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 8px 12px !important;
+    gap: 6px !important;
+  }
+  .app-header nav {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  .app-header nav a {
+    font-size: 0.8rem !important;
+    padding: 6px 10px !important;
+    white-space: nowrap;
+  }
+
+  /* Hero section */
+  .hero-section {
+    padding: 28px 16px 24px !important;
+  }
+  .hero-section h1 {
+    font-size: 1.4rem !important;
+    line-height: 1.3 !important;
+  }
+  .hero-section p {
+    font-size: 0.9rem !important;
+  }
+  .hero-buttons {
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100%;
+  }
+  .hero-buttons a, .hero-buttons button {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Grids: force single column on mobile */
+  .grid-2col, .grid-3col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pathway cards */
+  .pathway-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stat cards */
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Page containers: reduce padding */
+  .page-container {
+    padding: 12px !important;
+  }
+
+  /* Tables: ensure horizontal scroll */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+  .table-responsive table {
+    min-width: 600px;
+  }
+
+  /* Form rows: stack vertically */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Detail tables: stack label/value */
+  .detail-table td:first-child {
+    width: auto !important;
+    min-width: auto !important;
+    display: block;
+    font-weight: 600;
+    padding-bottom: 2px !important;
+  }
+  .detail-table td:last-child {
+    display: block;
+    padding-top: 0 !important;
+    padding-bottom: 10px !important;
+  }
+  .detail-table tr {
+    display: block;
+    border-bottom: 1px solid #eee;
+    padding: 6px 0;
+  }
+
+  /* Tabs: horizontal scroll */
+  .tab-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    padding-bottom: 4px;
+  }
+  .tab-bar button {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.8rem !important;
+    padding: 6px 14px !important;
+  }
+
+  /* Cards: full width */
+  .card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Download bar */
+  .download-bar {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center;
+  }
+
+  /* Advert cards */
+  .advert-card-actions {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .advert-card-actions a,
+  .advert-card-actions button {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Summary bar (advert detail) */
+  .summary-bar {
+    gap: 10px !important;
+  }
+  .summary-bar > div {
+    flex: 1 0 calc(50% - 10px) !important;
+    min-width: 0 !important;
+  }
+
+  /* Checkbox grids */
+  .checkbox-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal */
+  .modal-content {
+    width: 95% !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+
+  /* Font adjustments for readability */
+  .small-text { font-size: 0.85rem !important; }
+}
+
+/* ── Extra Small: < 400px ── */
+@media (max-width: 400px) {
+  .app-header {
+    padding: 6px 8px !important;
+  }
+  .stat-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-section h1 {
+    font-size: 1.2rem !important;
+  }
+  .page-container {
+    padding: 8px !important;
+  }
+}

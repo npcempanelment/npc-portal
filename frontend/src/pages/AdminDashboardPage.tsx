@@ -8,13 +8,13 @@ import { Link } from 'react-router-dom';
 
 export default function AdminDashboardPage() {
   return (
-    <div style={styles.container}>
+    <div className="page-container" style={styles.container}>
       <h2>Administration Dashboard</h2>
       <p style={styles.subtitle}>
         Administration Group — Empanelment AI §3.3 & AI-858/2026 SOP
       </p>
 
-      <div style={styles.grid}>
+      <div className="stat-grid" style={styles.grid}>
         <AdminCard
           title="Domains & Sub-Domains"
           description="Configure competency domains and sub-domains for empanelment."
@@ -72,7 +72,7 @@ function AdminCard({ title, description, linkTo }: { title: string; description:
 const styles: Record<string, React.CSSProperties> = {
   container: { maxWidth: '1000px', margin: '0 auto', padding: '24px' },
   subtitle: { color: '#666', marginBottom: '24px' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '16px' },
   card: {
     display: 'block',
     padding: '20px',

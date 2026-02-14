@@ -85,7 +85,7 @@ export default function AdvertDetailPage() {
     : null;
 
   return (
-    <div style={styles.container}>
+    <div className="page-container" style={styles.container}>
       {/* Back link */}
       <Link to="/adverts" style={styles.backLink}>&larr; Back to all openings</Link>
 
@@ -117,7 +117,7 @@ export default function AdvertDetailPage() {
       </div>
 
       {/* Key details summary bar */}
-      <div style={styles.summaryBar}>
+      <div className="summary-bar" style={styles.summaryBar}>
         <SummaryItem label="Designation" value={DESIGNATION_LABELS[advert.designation] || advert.designation} />
         <SummaryItem label="Engagement" value={ENGAGEMENT_LABELS[advert.engagementType] || advert.engagementType} />
         <SummaryItem label="Vacancies" value={String(advert.numberOfPosts)} />
@@ -132,7 +132,8 @@ export default function AdvertDetailPage() {
       <div style={styles.sections}>
         {/* Eligibility & Qualification */}
         <Section title="Eligibility Criteria">
-          <table style={styles.detailTable}>
+          <div className="table-responsive">
+          <table className="detail-table" style={styles.detailTable}>
             <tbody>
               {advert.minQualification && (
                 <DetailRow label="Minimum Qualification" value={advert.minQualification} />
@@ -154,6 +155,7 @@ export default function AdvertDetailPage() {
               )}
             </tbody>
           </table>
+          </div>
           {advert.eligibilityCriteria && (
             <div style={styles.richBlock}>
               <RichText text={advert.eligibilityCriteria} />
@@ -249,7 +251,7 @@ export default function AdvertDetailPage() {
 
         {/* How to Apply */}
         <Section title="How to Apply">
-          <div style={styles.howToApply}>
+          <div className="hero-buttons" style={styles.howToApply}>
             <p style={{ margin: '0 0 12px', fontSize: '0.95rem' }}>
               Apply online through this portal by clicking the button below. Alternatively, submit your application
               {advert.applicationEmail ? ` via email to ${advert.applicationEmail}` : ' through the NPC empanelment portal'}
@@ -329,7 +331,7 @@ const styles: Record<string, React.CSSProperties> = {
   section: { borderBottom: '1px solid #f0f0f0', padding: '20px 0' },
   sectionTitle: { margin: '0 0 12px', fontSize: '1.05rem', color: '#1a237e', borderBottom: '2px solid #e8eaf6', paddingBottom: '6px' },
   detailTable: { width: '100%', borderCollapse: 'collapse' as const },
-  dtLabel: { padding: '8px 12px 8px 0', fontWeight: 600, fontSize: '0.9rem', color: '#555', verticalAlign: 'top', width: '200px', borderBottom: '1px solid #f5f5f5' },
+  dtLabel: { padding: '8px 12px 8px 0', fontWeight: 600, fontSize: '0.9rem', color: '#555', verticalAlign: 'top', width: 'auto', minWidth: '140px', borderBottom: '1px solid #f5f5f5' },
   dtValue: { padding: '8px 0', fontSize: '0.9rem', color: '#333', borderBottom: '1px solid #f5f5f5' },
   richBlock: { margin: '8px 0', padding: '12px 16px', background: '#fafafa', borderRadius: '4px', border: '1px solid #f0f0f0' },
   roleBox: { fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '12px' },

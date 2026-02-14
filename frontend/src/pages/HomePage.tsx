@@ -51,7 +51,7 @@ export default function HomePage() {
   return (
     <div>
       {/* ═══ SECTION 1: Hero Banner ═══ */}
-      <section style={S.hero}>
+      <section className="hero-section" style={S.hero}>
         <div style={S.heroInner}>
           <h1 style={S.heroTitle}>Empanelment & Engagement Portal</h1>
           <p style={S.heroDesc}>
@@ -59,14 +59,14 @@ export default function HomePage() {
             contribute their expertise — either through continuous empanelment as domain experts
             or through contractual engagement against specific project requirements.
           </p>
-          <div style={S.heroBtns}>
+          <div className="hero-buttons" style={S.heroBtns}>
             <Link to="/apply/empanelment" style={S.heroBtn}>Apply for Empanelment</Link>
             <Link to="/adverts" style={S.heroBtnOutline}>View Open Positions</Link>
           </div>
         </div>
       </section>
 
-      <div style={S.container}>
+      <div className="page-container" style={S.container}>
         {/* ═══ SECTION 2: Two Engagement Pathways ═══ */}
         <section style={S.section}>
           <h2 style={S.sectionTitle}>How to Engage with NPC</h2>
@@ -75,7 +75,7 @@ export default function HomePage() {
             Choose the pathway that matches your availability and career goals.
           </p>
 
-          <div style={S.pathwayGrid}>
+          <div className="pathway-grid" style={S.pathwayGrid}>
             {/* Empanelment Card */}
             <div style={S.pathwayCard}>
               <div style={S.pathwayHeader}>
@@ -131,7 +131,7 @@ export default function HomePage() {
                 Auto-screening evaluates your eligibility against the advert criteria.
               </p>
 
-              <div style={S.twoCol}>
+              <div className="grid-2col" style={S.twoCol}>
                 <div style={S.subCard}>
                   <h4 style={{ ...S.subHead, color: '#2e7d32' }}>Full-Time Engagement</h4>
                   <ul style={S.compactList}>
@@ -301,7 +301,7 @@ export default function HomePage() {
             the pay structure and engagement terms & conditions apply as per AI-858.
           </p>
 
-          <div style={S.termsGrid}>
+          <div className="grid-2col" style={S.termsGrid}>
             <div style={{ ...S.termsCard, borderTop: '4px solid #2e7d32' }}>
               <h4 style={{ color: '#2e7d32', marginTop: 0 }}>Full-Time Engagement</h4>
               <ul style={S.termsList}>
@@ -347,7 +347,7 @@ export default function HomePage() {
             NPC works across the following domains. Experts can apply for empanelment or contractual
             engagement in their area of specialization.
           </p>
-          <div style={S.domainGrid}>
+          <div className="grid-3col" style={S.domainGrid}>
             {DOMAINS.map(d => (
               <div key={d.name} style={S.domainCard}>
                 <h4 style={S.domainName}>{d.name}</h4>
@@ -363,7 +363,7 @@ export default function HomePage() {
           <p style={{ margin: '0 0 16px', color: '#555', fontSize: '0.95rem' }}>
             Join India's premier productivity organization as an external expert or contractual professional.
           </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="hero-buttons" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link to="/apply/empanelment" style={S.ctaBtn}>Apply for Empanelment</Link>
             <Link to="/adverts" style={{ ...S.ctaBtn, background: '#e65100' }}>View Open Positions</Link>
             <Link to="/register" style={{ ...S.ctaBtn, background: '#fff', color: '#1a237e', border: '2px solid #1a237e' }}>Register / Login</Link>
@@ -395,7 +395,7 @@ const S: Record<string, React.CSSProperties> = {
   sectionDesc: { color: '#666', fontSize: '0.95rem', textAlign: 'center', maxWidth: 750, margin: '0 auto 24px', lineHeight: 1.6 },
 
   // Pathways
-  pathwayGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24 },
+  pathwayGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: 24 },
   pathwayCard: { border: '1px solid #ddd', borderRadius: 10, padding: 24, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   pathwayHeader: { marginBottom: 12 },
   pathwayTitle: { margin: '8px 0 0', color: '#1a237e', fontSize: '1.15rem' },

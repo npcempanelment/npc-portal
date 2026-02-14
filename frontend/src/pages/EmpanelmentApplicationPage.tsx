@@ -237,7 +237,7 @@ export default function EmpanelmentApplicationPage() {
   const STEPS = ['Personal Details', 'Education & Docs', 'Experience & Docs', 'Certifications', 'Domain & Submit'];
 
   return (
-    <div style={S.container}>
+    <div className="page-container" style={S.container}>
       <h2 style={{ color: '#1a237e', marginBottom: 4 }}>Apply for Empanelment</h2>
       <p style={S.subtitle}>Empanelment as External Expert / Associate — continuous basis</p>
 
@@ -264,22 +264,22 @@ export default function EmpanelmentApplicationPage() {
         {step === 1 && (
           <fieldset style={S.fieldset}>
             <legend style={S.legend}>Personal Details</legend>
-            <div style={S.row}>
+            <div className="form-row" style={S.row}>
               <label style={S.label}>Full Name *<input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required style={S.input} /></label>
               <label style={S.label}>Date of Birth *<input type="date" value={dob} onChange={e => setDob(e.target.value)} required style={S.input} /></label>
             </div>
-            <div style={S.row}>
+            <div className="form-row" style={S.row}>
               <label style={S.label}>Gender<select value={gender} onChange={e => setGender(e.target.value)} style={S.input}><option value="">-- Select --</option>{GENDER_OPTIONS.map(g => <option key={g}>{g}</option>)}</select></label>
               <label style={S.label}>Father / Mother / Spouse Name<input type="text" value={fatherSpouseName} onChange={e => setFatherSpouseName(e.target.value)} style={S.input} /></label>
             </div>
             <label style={S.label}>Background Type *<select value={backgroundType} onChange={e => setBackgroundType(e.target.value)} style={S.input}>{BG_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
-            <div style={S.row}>
+            <div className="form-row" style={S.row}>
               <label style={S.label}>Mobile *<input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} required style={S.input} placeholder="9876543210" /></label>
               <label style={S.label}>Alternate Phone<input type="tel" value={altPhone} onChange={e => setAltPhone(e.target.value)} style={S.input} /></label>
             </div>
             <label style={S.label}>Correspondence Address<textarea value={correspondenceAddress} onChange={e => setCorrespondenceAddress(e.target.value)} style={{ ...S.input, height: 60, resize: 'vertical' as const }} /></label>
             <label style={S.label}>Permanent Address<textarea value={permanentAddress} onChange={e => setPermanentAddress(e.target.value)} style={{ ...S.input, height: 60, resize: 'vertical' as const }} /></label>
-            <div style={S.row}>
+            <div className="form-row" style={S.row}>
               <div>
                 <strong style={{ fontSize: '0.9rem' }}>Passport Photo</strong>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
@@ -313,15 +313,15 @@ export default function EmpanelmentApplicationPage() {
                     <strong style={{ color: '#1a237e' }}><span style={S.docTag}>{tag}</span> Qualification #{idx + 1}</strong>
                     {educations.length > 1 && <button type="button" onClick={() => setEducations(educations.filter((_, i) => i !== idx))} style={S.removeBtn}>Remove</button>}
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Degree *<input type="text" value={edu.degree} onChange={e => updateEdu(idx, 'degree', e.target.value)} required style={S.input} placeholder="e.g., B.Tech, MBA, Ph.D." /></label>
                     <label style={S.label}>Subject / Field *<input type="text" value={edu.field} onChange={e => updateEdu(idx, 'field', e.target.value)} required style={S.input} /></label>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Institution *<input type="text" value={edu.institution} onChange={e => updateEdu(idx, 'institution', e.target.value)} required style={S.input} /></label>
                     <label style={S.label}>University / Board<input type="text" value={edu.university} onChange={e => updateEdu(idx, 'university', e.target.value)} style={S.input} placeholder="e.g., Delhi University" /></label>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Year of Passing *<input type="number" value={edu.yearOfPassing} onChange={e => updateEdu(idx, 'yearOfPassing', parseInt(e.target.value))} required style={S.input} min={1950} max={2030} /></label>
                     <label style={S.label}>Marks (%) / CGPA<input type="text" value={edu.grade} onChange={e => updateEdu(idx, 'grade', e.target.value)} style={S.input} placeholder="e.g., 78% or 8.5" /></label>
                   </div>
@@ -356,15 +356,15 @@ export default function EmpanelmentApplicationPage() {
                     <strong style={{ color: '#1a237e' }}><span style={S.docTag}>{tag}</span> Experience #{idx + 1}</strong>
                     {experiences.length > 1 && <button type="button" onClick={() => setExperiences(experiences.filter((_, i) => i !== idx))} style={S.removeBtn}>Remove</button>}
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Organization *<input type="text" value={exp.organization} onChange={e => updateExp(idx, 'organization', e.target.value)} required style={S.input} /></label>
                     <label style={S.label}>Designation *<input type="text" value={exp.designation} onChange={e => updateExp(idx, 'designation', e.target.value)} required style={S.input} /></label>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Start Date *<input type="date" value={exp.startDate} onChange={e => updateExp(idx, 'startDate', e.target.value)} required style={S.input} /></label>
                     <label style={S.label}>End Date {exp.isCurrent ? '(Current)' : ''}<input type="date" value={exp.endDate} onChange={e => updateExp(idx, 'endDate', e.target.value)} disabled={exp.isCurrent} style={S.input} /></label>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Pay Band / CTC<input type="text" value={exp.payBandOrRemuneration} onChange={e => updateExp(idx, 'payBandOrRemuneration', e.target.value)} style={S.input} placeholder="e.g., Level 11 / Rs 80,000" /></label>
                     <label style={S.label}>Pay Level (7th CPC)<input type="text" value={exp.payLevel} onChange={e => updateExp(idx, 'payLevel', e.target.value)} style={S.input} placeholder="e.g., 10, 12" /></label>
                   </div>
@@ -400,11 +400,11 @@ export default function EmpanelmentApplicationPage() {
                     <strong style={{ color: '#1a237e' }}><span style={S.docTag}>{tag}</span> Certification #{idx + 1}</strong>
                     <button type="button" onClick={() => setCertifications(certifications.filter((_, i) => i !== idx))} style={S.removeBtn}>Remove</button>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Name *<input type="text" value={cert.name} onChange={e => updateCert(idx, 'name', e.target.value)} style={S.input} placeholder="e.g., PMP" /></label>
                     <label style={S.label}>Issuing Body *<input type="text" value={cert.issuingBody} onChange={e => updateCert(idx, 'issuingBody', e.target.value)} style={S.input} placeholder="e.g., PMI" /></label>
                   </div>
-                  <div style={S.row}>
+                  <div className="form-row" style={S.row}>
                     <label style={S.label}>Year<input type="number" value={cert.yearObtained || ''} onChange={e => updateCert(idx, 'yearObtained', parseInt(e.target.value) || undefined)} style={S.input} /></label>
                     <label style={S.label}>Certificate No.<input type="text" value={cert.certificateNumber || ''} onChange={e => updateCert(idx, 'certificateNumber', e.target.value)} style={S.input} /></label>
                   </div>
@@ -425,7 +425,7 @@ export default function EmpanelmentApplicationPage() {
           <>
             <fieldset style={S.fieldset}>
               <legend style={S.legend}>Domain & Empanelment Area</legend>
-              <div style={S.row}>
+              <div className="form-row" style={S.row}>
                 <label style={S.label}>Domain *<select value={domainId} onChange={e => { setDomainId(e.target.value); setSubDomainId(''); }} required style={S.input}><option value="">-- Select --</option>{domains.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
                 <label style={S.label}>Sub-Domain<select value={subDomainId} onChange={e => setSubDomainId(e.target.value)} style={S.input} disabled={!selectedDomain}><option value="">-- Select --</option>{selectedDomain?.subDomains.map(sd => <option key={sd.id} value={sd.id}>{sd.name}</option>)}</select></label>
               </div>
@@ -434,7 +434,7 @@ export default function EmpanelmentApplicationPage() {
 
             <fieldset style={S.fieldset}>
               <legend style={S.legend}>Preferred NPC Office(s) *</legend>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 4 }}>
+              <div className="checkbox-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 4 }}>
                 {offices.map(o => <label key={o.id} style={S.checkLabel}><input type="checkbox" checked={selectedOffices.includes(o.id)} onChange={() => toggleOffice(o.id)} />{o.name} ({o.city})</label>)}
               </div>
             </fieldset>
@@ -442,19 +442,21 @@ export default function EmpanelmentApplicationPage() {
             {/* Document Summary */}
             <fieldset style={S.fieldset}>
               <legend style={S.legend}>Attached Documents Summary</legend>
-              <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
-                <thead><tr style={{ background: '#e8eaf6', textAlign: 'left' }}><th style={S.th}>Ref No.</th><th style={S.th}>Description</th><th style={S.th}>File</th></tr></thead>
-                <tbody>
-                  {photoFile && <tr><td style={S.td}>PHOTO</td><td style={S.td}>Passport Photo</td><td style={S.td}>{photoFile.name}</td></tr>}
-                  {idProofFile && <tr><td style={S.td}>ID-PROOF</td><td style={S.td}>ID Proof</td><td style={S.td}>{idProofName}</td></tr>}
-                  {educations.map((e, i) => e.docFile && <tr key={`e${i}`}><td style={S.td}>EDU-{i+1}</td><td style={S.td}>{e.degree} — {e.institution}</td><td style={S.td}>{e.docName}</td></tr>)}
-                  {experiences.map((e, i) => e.docFile && <tr key={`x${i}`}><td style={S.td}>EXP-{i+1}</td><td style={S.td}>{e.designation} — {e.organization}</td><td style={S.td}>{e.docName}</td></tr>)}
-                  {certifications.map((c, i) => c.docFile && <tr key={`c${i}`}><td style={S.td}>CERT-{i+1}</td><td style={S.td}>{c.name} — {c.issuingBody}</td><td style={S.td}>{c.docName}</td></tr>)}
-                  {!photoFile && !idProofFile && !educations.some(e => e.docFile) && !experiences.some(e => e.docFile) && !certifications.some(c => c.docFile) && (
-                    <tr><td colSpan={3} style={{ ...S.td, color: '#999', fontStyle: 'italic' }}>No documents attached. You can go back to add them.</td></tr>
-                  )}
-                </tbody>
-              </table>
+              <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                  <thead><tr style={{ background: '#e8eaf6', textAlign: 'left' }}><th style={S.th}>Ref No.</th><th style={S.th}>Description</th><th style={S.th}>File</th></tr></thead>
+                  <tbody>
+                    {photoFile && <tr><td style={S.td}>PHOTO</td><td style={S.td}>Passport Photo</td><td style={S.td}>{photoFile.name}</td></tr>}
+                    {idProofFile && <tr><td style={S.td}>ID-PROOF</td><td style={S.td}>ID Proof</td><td style={S.td}>{idProofName}</td></tr>}
+                    {educations.map((e, i) => e.docFile && <tr key={`e${i}`}><td style={S.td}>EDU-{i+1}</td><td style={S.td}>{e.degree} — {e.institution}</td><td style={S.td}>{e.docName}</td></tr>)}
+                    {experiences.map((e, i) => e.docFile && <tr key={`x${i}`}><td style={S.td}>EXP-{i+1}</td><td style={S.td}>{e.designation} — {e.organization}</td><td style={S.td}>{e.docName}</td></tr>)}
+                    {certifications.map((c, i) => c.docFile && <tr key={`c${i}`}><td style={S.td}>CERT-{i+1}</td><td style={S.td}>{c.name} — {c.issuingBody}</td><td style={S.td}>{c.docName}</td></tr>)}
+                    {!photoFile && !idProofFile && !educations.some(e => e.docFile) && !experiences.some(e => e.docFile) && !certifications.some(c => c.docFile) && (
+                      <tr><td colSpan={3} style={{ ...S.td, color: '#999', fontStyle: 'italic' }}>No documents attached. You can go back to add them.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </fieldset>
 
             <div style={S.note}>By submitting, I confirm the information is accurate and consent to auto-screening per NPC Empanelment AI.</div>
@@ -490,7 +492,7 @@ const S: Record<string, React.CSSProperties> = {
   checkLabel: { display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.85rem' },
   entryBlock: { border: '1px solid #e0e0e0', borderRadius: 6, padding: 14, marginBottom: 12, background: '#fafafa' },
   addBtn: { background: '#e8eaf6', border: '1px solid #9fa8da', padding: '8px 18px', borderRadius: 4, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 },
-  removeBtn: { background: '#ffebee', border: '1px solid #ef9a9a', padding: '4px 12px', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem', color: '#c62828' },
+  removeBtn: { background: '#ffebee', border: '1px solid #ef9a9a', padding: '8px 16px', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem', color: '#c62828' },
   docRow: { marginTop: 10, padding: '8px 12px', background: '#e3f2fd', borderRadius: 4, border: '1px dashed #90caf9', display: 'flex', flexWrap: 'wrap' as const, alignItems: 'center', gap: 10 },
   docLabel: { fontSize: '0.85rem', fontWeight: 600, color: '#1565c0' },
   docTag: { background: '#1a237e', color: '#fff', padding: '2px 8px', borderRadius: 10, fontSize: '0.75rem', marginRight: 6 },

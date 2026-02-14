@@ -131,7 +131,7 @@ export default function ProfilePage() {
   const dob = profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
   return (
-    <div style={S.container}>
+    <div className="page-container" style={S.container}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
         <h2 style={{ margin: 0 }}>My Profile</h2>
         <Link to="/dashboard" style={{ color: '#1a237e', fontSize: '0.9rem' }}>&larr; Back to Dashboard</Link>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
       {/* Personal Details */}
       <div style={S.card}>
         <h3 style={S.cardTitle}>Personal Details</h3>
-        <div style={S.fieldGrid}>
+        <div className="form-row" style={S.fieldGrid}>
           <Field label="Full Name" value={profile.fullName} />
           <Field label="Date of Birth" value={dob} />
           <Field label="Gender" value={profile.gender || '—'} />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
         {profile.lastOrganization && (
           <>
             <h4 style={{ ...S.subHead, marginTop: 16 }}>Previous Employment (Govt/PSU)</h4>
-            <div style={S.fieldGrid}>
+            <div className="form-row" style={S.fieldGrid}>
               <Field label="Last Organization" value={profile.lastOrganization} />
               <Field label="Last Designation" value={profile.lastDesignation} />
               <Field label="Last Pay Level" value={profile.lastPayLevel} />
@@ -182,7 +182,7 @@ export default function ProfilePage() {
         {profile.educations.length === 0 ? (
           <p style={S.emptyText}>No education records.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={S.table}>
               <thead>
                 <tr style={S.thRow}>
@@ -223,7 +223,7 @@ export default function ProfilePage() {
         {profile.experiences.length === 0 ? (
           <p style={S.emptyText}>No experience records.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={S.table}>
               <thead>
                 <tr style={S.thRow}>
@@ -264,7 +264,7 @@ export default function ProfilePage() {
       {profile.certifications.length > 0 && (
         <div style={S.card}>
           <h3 style={S.cardTitle}>Certifications ({profile.certifications.length})</h3>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={S.table}>
               <thead>
                 <tr style={S.thRow}>
@@ -295,7 +295,7 @@ export default function ProfilePage() {
       {profile.documents.length > 0 && (
         <div style={S.card}>
           <h3 style={S.cardTitle}>Uploaded Documents ({profile.documents.length})</h3>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive" style={{ overflowX: 'auto' }}>
             <table style={S.table}>
               <thead>
                 <tr style={S.thRow}>
@@ -337,7 +337,7 @@ const S: Record<string, React.CSSProperties> = {
   card: { background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
   cardTitle: { margin: '0 0 14px', color: '#1a237e', fontSize: '1.1rem', borderBottom: '2px solid #e8eaf6', paddingBottom: 8 },
   subHead: { color: '#1a237e', fontSize: '0.95rem', margin: '0 0 8px' },
-  fieldGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px 20px' },
+  fieldGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '8px 20px' },
   fieldLabel: { fontSize: '0.82rem', color: '#888', marginRight: 6 },
   fieldValue: { fontSize: '0.9rem', color: '#333' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' },

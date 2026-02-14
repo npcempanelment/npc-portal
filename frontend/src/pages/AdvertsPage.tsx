@@ -76,7 +76,7 @@ export default function AdvertsPage() {
   }
 
   return (
-    <div style={styles.container}>
+    <div className="page-container" style={styles.container}>
       {/* Header section */}
       <div style={styles.pageHeader}>
         <h2 style={styles.pageTitle}>Current Openings</h2>
@@ -193,7 +193,7 @@ export default function AdvertsPage() {
                     </span>
                   )}
                 </div>
-                <div style={styles.cardActions}>
+                <div className="advert-card-actions" style={styles.cardActions}>
                   <Link to={`/adverts/${advert.id}`} style={styles.viewBtn}>
                     View Full Details
                   </Link>
@@ -248,7 +248,7 @@ const styles: Record<string, React.CSSProperties> = {
   aiRef: { margin: 0, fontSize: '0.8rem', color: '#999', fontStyle: 'italic' },
   searchBar: { display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap' as const },
   searchInput: {
-    flex: 1, minWidth: '250px', padding: '10px 16px', border: '1px solid #ccc',
+    flex: 1, minWidth: 'min(100%, 250px)', padding: '10px 16px', border: '1px solid #ccc',
     borderRadius: '6px', fontSize: '0.95rem', outline: 'none',
   },
   resultCount: { fontSize: '0.85rem', color: '#888', whiteSpace: 'nowrap' as const },
@@ -275,7 +275,7 @@ const styles: Record<string, React.CSSProperties> = {
   jobTitle: { margin: '0 0 2px', fontSize: '1.15rem', color: '#1a237e' },
   advertNo: { margin: '0 0 12px', fontSize: '0.8rem', color: '#999' },
   infoGrid: {
-    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))',
     gap: '10px', margin: '12px 0',
   },
   infoItem: { display: 'flex', gap: '8px', alignItems: 'flex-start' },

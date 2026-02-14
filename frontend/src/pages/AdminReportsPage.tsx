@@ -145,10 +145,10 @@ export default function AdminReportsPage() {
   if (loading) return <div style={styles.container}><p>Loading reports...</p></div>;
 
   return (
-    <div style={styles.container}>
+    <div className="page-container" style={styles.container}>
       <h2>Reports &amp; Statistics</h2>
 
-      <div style={styles.tabs}>
+      <div className="tab-bar" style={styles.tabs}>
         {(['overview', 'contractual', 'empanelment'] as Tab[]).map(t => (
           <button key={t} onClick={() => {
             setTab(t);
@@ -194,7 +194,7 @@ function OverviewTab({ stats }: { stats: Stats }) {
   return (
     <div>
       {/* Summary Cards */}
-      <div style={styles.statGrid}>
+      <div className="stat-grid" style={styles.statGrid}>
         <StatCard label="Total Applicants" value={s.totalProfiles} color="#1a237e" />
         <StatCard label="Published Adverts" value={s.publishedAdverts} sub={`of ${s.totalAdverts} total`} color="#0d47a1" />
         <StatCard label="Contractual Applications" value={s.totalContractualApps} sub={`${s.eligibleContractualApps} eligible`} color="#2e7d32" />
@@ -234,6 +234,7 @@ function OverviewTab({ stats }: { stats: Stats }) {
       {stats.appsPerAdvert.length > 0 && (
         <div style={{ marginTop: 24 }}>
           <h3 style={styles.sectionTitle}>Applications per Published Advert</h3>
+          <div className="table-responsive">
           <table style={styles.table}>
             <thead>
               <tr>
@@ -258,6 +259,7 @@ function OverviewTab({ stats }: { stats: Stats }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -283,7 +285,7 @@ function ApplicationsTab({ type, data, onDownload, onViewDocs }: {
   if (data.length === 0) {
     return (
       <div>
-        <div style={styles.downloadBar}>
+        <div className="download-bar" style={styles.downloadBar}>
           <span style={{ color: '#888' }}>No {type} applications found.</span>
           <button onClick={onDownload} style={styles.downloadBtn}>Download CSV</button>
         </div>
@@ -293,7 +295,7 @@ function ApplicationsTab({ type, data, onDownload, onViewDocs }: {
 
   return (
     <div>
-      <div style={styles.downloadBar}>
+      <div className="download-bar" style={styles.downloadBar}>
         <span style={{ fontSize: '0.9rem' }}>
           <strong>{data.length}</strong> {type} application(s)
         </span>
@@ -454,7 +456,7 @@ function DocumentModal({ applicantName, documents, onClose }: {
 
   return (
     <div style={modalStyles.overlay} onClick={onClose}>
-      <div style={modalStyles.modal} onClick={e => e.stopPropagation()}>
+      <div className="modal-content" style={modalStyles.modal} onClick={e => e.stopPropagation()}>
         <div style={modalStyles.header}>
           <h3 style={{ margin: 0 }}>Documents — {applicantName}</h3>
           <button onClick={onClose} style={modalStyles.closeBtn}>&times;</button>
@@ -463,6 +465,7 @@ function DocumentModal({ applicantName, documents, onClose }: {
           {documents.length === 0 ? (
             <p style={{ color: '#888' }}>No documents uploaded.</p>
           ) : (
+            <div className="table-responsive">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
@@ -503,6 +506,7 @@ function DocumentModal({ applicantName, documents, onClose }: {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
@@ -553,7 +557,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#fff', cursor: 'pointer', fontSize: '0.9rem',
   },
   tabActive: { background: '#1a237e', color: '#fff', borderColor: '#1a237e' },
-  statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 },
+  statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 16 },
   statCard: {
     background: '#fff', padding: '20px', borderRadius: 8,
     boxShadow: '0 1px 3px rgba(0,0,0,0.08)',

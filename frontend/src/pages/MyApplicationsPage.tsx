@@ -106,7 +106,7 @@ export default function MyApplicationsPage() {
   const hasNoApps = empanelmentApps.length === 0 && contractualApps.length === 0;
 
   return (
-    <div style={S.container}>
+    <div className="page-container" style={S.container}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
         <h2 style={{ margin: 0 }}>My Applications</h2>
         <Link to="/dashboard" style={{ color: '#1a237e', fontSize: '0.9rem' }}>&larr; Back to Dashboard</Link>

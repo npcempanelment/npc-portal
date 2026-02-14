@@ -10,7 +10,7 @@ export default function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header style={styles.header}>
+    <header className="app-header" style={styles.header}>
       <div style={styles.brand}>
         <img src="/logo.png" alt="NPC" style={styles.logo} />
         <div>
