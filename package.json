@@ -9,9 +9,17 @@
     "build:backend": "cd backend && npx prisma generate && npm run build",
     "build": "npm run build:frontend && npm run build:backend",
     "start": "cd backend && npx prisma migrate deploy && node dist/app.js",
-    "dev": "echo 'Run frontend and backend separately in dev mode'"
+    "dev": "echo 'Run frontend and backend separately in dev mode'",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:e2e": "npx playwright test",
+    "test:all": "cd backend && npm test && cd ../frontend && npm test && cd .. && npx playwright test"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }
