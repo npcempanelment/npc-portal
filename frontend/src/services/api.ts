@@ -83,6 +83,11 @@ export async function createAdvert(payload: Record<string, any>) {
   return data;
 }
 
+export async function updateAdvert(id: string, payload: Record<string, any>) {
+  const { data } = await api.put(`/admin/adverts/${id}`, payload);
+  return data;
+}
+
 export async function publishAdvertApi(id: string) {
   const { data } = await api.post(`/admin/adverts/${id}/publish`);
   return data;

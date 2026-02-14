@@ -100,6 +100,7 @@ export default function AdminAdvertsPage() {
             )}
             <div style={styles.cardActions}>
               <Link to={`/adverts/${advert.id}`} style={styles.viewBtn}>View</Link>
+              <Link to={`/admin/adverts/${advert.id}/edit`} style={styles.editBtn}>Edit</Link>
               {advert.status === 'DRAFT' && (
                 <button onClick={() => handlePublish(advert.id)} style={styles.publishBtn}>Publish</button>
               )}
@@ -139,6 +140,10 @@ const styles: Record<string, React.CSSProperties> = {
   viewBtn: {
     padding: '6px 16px', border: '1px solid #1a237e', borderRadius: 4,
     color: '#1a237e', textDecoration: 'none', fontSize: '0.85rem',
+  },
+  editBtn: {
+    padding: '6px 16px', border: '1px solid #ff9800', borderRadius: 4,
+    color: '#e65100', textDecoration: 'none', fontSize: '0.85rem', background: '#fff3e0',
   },
   publishBtn: {
     padding: '6px 16px', background: '#4caf50', color: '#fff', border: 'none',

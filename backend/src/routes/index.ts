@@ -35,6 +35,7 @@ router.get('/master/adverts/:id', masterCtrl.getAdvertById);
 // ── Admin: adverts management ──
 router.get('/admin/adverts', authenticate, authorize(UserRole.ADMIN, UserRole.DG), masterCtrl.getAllAdverts);
 router.post('/admin/adverts', authenticate, authorize(UserRole.ADMIN), masterCtrl.createAdvert);
+router.put('/admin/adverts/:id', authenticate, authorize(UserRole.ADMIN), masterCtrl.updateAdvert);
 router.post('/admin/adverts/:id/publish', authenticate, authorize(UserRole.ADMIN), masterCtrl.publishAdvert);
 
 // ── Admin: reports ──

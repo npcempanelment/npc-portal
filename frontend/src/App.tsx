@@ -81,6 +81,7 @@ export default function App() {
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/adverts" element={<AdminAdvertsPage />} />
             <Route path="/admin/adverts/new" element={<AdminAdvertFormPage />} />
+            <Route path="/admin/adverts/:id/edit" element={<AdminAdvertFormPage />} />
             <Route path="/admin/domains" element={<AdminDomainsPage />} />
             <Route path="/admin/offices" element={<AdminOfficesPage />} />
             <Route path="/admin/committees" element={<AdminCommitteesPage />} />

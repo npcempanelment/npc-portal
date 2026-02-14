@@ -9,9 +9,9 @@
  * are auto-filled from AI-858/2026 data. Admin can override any auto-filled value.
  */
 
-import React, { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getDomains, getOffices, createAdvert } from '../services/api';
+import React, { useState, useEffect, useRef, type FormEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getDomains, getOffices, createAdvert, updateAdvert, getAdvertById } from '../services/api';
 import { AI_858_DESIGNATIONS, getAutoFillValues, FULL_TIME_TERMS, PART_TIME_TERMS, COMMON_GENERAL_CONDITIONS } from '../data/remunerationData';
 import type { Domain, NpcOffice } from '../types';
 
@@ -25,9 +25,14 @@ const REQUISITION_TYPES = [
 
 export default function AdminAdvertFormPage() {
   const navigate = useNavigate();
+  const { id: advertId } = useParams<{ id: string }>();
+  const isEditMode = Boolean(advertId);
+  const loadedExisting = useRef(false);
+
   const [domains, setDomains] = useState<Domain[]>([]);
   const [offices, setOffices] = useState<NpcOffice[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetchingAdvert, setFetchingAdvert] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [step, setStep] = useState(1);
@@ -73,28 +78,77 @@ export default function AdminAdvertFormPage() {
     getOffices().then(setOffices).catch(console.error);
   }, []);
 
-  // Auto-fill when designation or engagement type changes
+  // Load existing advert data when editing
   useEffect(() => {
+    if (!advertId || loadedExisting.current) return;
+    loadedExisting.current = true;
+    setFetchingAdvert(true);
+    getAdvertById(advertId)
+      .then((advert) => {
+        setForm({
+          title: advert.title || '',
+          description: advert.description || '',
+          requisitionType: advert.requisitionType || 'PROJECT',
+          projectName: advert.projectName || '',
+          domainId: advert.domainId || '',
+          officeId: advert.officeId || '',
+          designation: advert.designation || 'OFFICE_EXECUTIVE',
+          engagementType: advert.engagementType || 'FULL_TIME',
+          numberOfPosts: advert.numberOfPosts || 1,
+          placeOfDeployment: advert.placeOfDeployment || '',
+          functionalRole: advert.functionalRole || '',
+          workResponsibilities: advert.workResponsibilities || '',
+          eligibilityCriteria: advert.eligibilityCriteria || '',
+          minQualification: advert.minQualification || '',
+          qualificationDetails: advert.qualificationDetails || '',
+          minExperienceYears: advert.minExperienceYears ?? 0,
+          maxAge: advert.maxAge ?? 65,
+          specificRequirements: advert.specificRequirements || '',
+          desirableSkills: advert.desirableSkills || '',
+          remunerationMin: advert.remunerationMin ?? 0,
+          remunerationMax: advert.remunerationMax ?? 0,
+          remunerationBasis: advert.remunerationBasis || 'MONTHLY',
+          remunerationNote: advert.remunerationNote || '',
+          contractPeriodMonths: advert.contractPeriodMonths ?? 12,
+          contractStartDate: advert.contractStartDate ? new Date(advert.contractStartDate).toISOString().slice(0, 10) : '',
+          termsAndConditions: advert.termsAndConditions || FULL_TIME_TERMS,
+          workingHoursNote: advert.workingHoursNote || '',
+          travelRequired: advert.travelRequired ?? false,
+          travelNote: advert.travelNote || '',
+          lastDateToApply: advert.lastDateToApply ? new Date(advert.lastDateToApply).toISOString().slice(0, 10) : '',
+          applicationEmail: advert.applicationEmail || 'ed-admin@npcindia.gov.in',
+          generalConditions: advert.generalConditions || COMMON_GENERAL_CONDITIONS,
+        });
+      })
+      .catch((err) => setError('Failed to load advert: ' + (err.message || 'Unknown error')))
+      .finally(() => setFetchingAdvert(false));
+  }, [advertId]);
+
+  // Auto-fill when designation or engagement type changes (skip in edit mode while loading)
+  useEffect(() => {
+    if (fetchingAdvert) return;
     const result = getAutoFillValues(form.designation, form.engagementType);
     if (result) {
-      setForm(prev => ({
-        ...prev,
-        remunerationMin: result.remunerationMin,
-        remunerationMax: result.remunerationMax,
-        remunerationBasis: result.remunerationBasis,
-        minQualification: result.minQualification,
-        maxAge: result.maxAge,
-        minExperienceYears: result.minExperienceYears,
-        remunerationNote: result.remunerationNote,
-        termsAndConditions: result.termsAndConditions,
-        workingHoursNote: result.workingHoursNote,
-        generalConditions: result.generalConditions,
-      }));
+      if (!isEditMode) {
+        setForm(prev => ({
+          ...prev,
+          remunerationMin: result.remunerationMin,
+          remunerationMax: result.remunerationMax,
+          remunerationBasis: result.remunerationBasis,
+          minQualification: result.minQualification,
+          maxAge: result.maxAge,
+          minExperienceYears: result.minExperienceYears,
+          remunerationNote: result.remunerationNote,
+          termsAndConditions: result.termsAndConditions,
+          workingHoursNote: result.workingHoursNote,
+          generalConditions: result.generalConditions,
+        }));
+      }
       setAutoFilled(true);
     } else {
       setAutoFilled(false);
     }
-  }, [form.designation, form.engagementType]);
+  }, [form.designation, form.engagementType, fetchingAdvert]);
 
   function updateField(field: string, value: any) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -120,11 +174,15 @@ export default function AdminAdvertFormPage() {
         contractStartDate: form.contractStartDate || undefined,
       };
 
-      const result = await createAdvert(payload);
+      const result = isEditMode
+        ? await updateAdvert(advertId!, payload)
+        : await createAdvert(payload);
       if (result.success) {
-        setSuccess(`Advertisement "${form.title}" created successfully as DRAFT. You can preview and publish it from the admin panel.`);
+        setSuccess(isEditMode
+          ? `Advertisement "${form.title}" updated successfully.`
+          : `Advertisement "${form.title}" created successfully as DRAFT. You can preview and publish it from the admin panel.`);
       } else {
-        setError(result.error || 'Failed to create advertisement.');
+        setError(result.error || (isEditMode ? 'Failed to update advertisement.' : 'Failed to create advertisement.'));
       }
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
@@ -136,15 +194,28 @@ export default function AdminAdvertFormPage() {
   const currentDesignationLabel = DESIGNATIONS.find(d => d.value === form.designation)?.label || form.designation;
   const STEP_LABELS = ['Standard Details', 'Auto-Filled Details', 'Review & Submit'];
 
+  if (fetchingAdvert) {
+    return <div style={styles.container}><p style={{ textAlign: 'center', padding: '48px' }}>Loading advertisement...</p></div>;
+  }
+
   if (success) {
     return (
       <div style={styles.container}>
         <div style={styles.successBox}>
-          <h3 style={{ margin: '0 0 8px', color: '#2e7d32' }}>Advertisement Created</h3>
+          <h3 style={{ margin: '0 0 8px', color: '#2e7d32' }}>{isEditMode ? 'Advertisement Updated' : 'Advertisement Created'}</h3>
           <p>{success}</p>
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <button onClick={() => { setSuccess(''); setForm(prev => ({ ...prev, title: '' })); setStep(1); }} style={styles.btn}>
-              Create Another
+            {isEditMode ? (
+              <button onClick={() => navigate(`/adverts/${advertId}`)} style={styles.btn}>
+                View Advertisement
+              </button>
+            ) : (
+              <button onClick={() => { setSuccess(''); setForm(prev => ({ ...prev, title: '' })); setStep(1); }} style={styles.btn}>
+                Create Another
+              </button>
+            )}
+            <button onClick={() => navigate('/admin/adverts')} style={styles.btnOutline}>
+              All Adverts
             </button>
             <button onClick={() => navigate('/admin')} style={styles.btnOutline}>
               Back to Admin
@@ -157,10 +228,11 @@ export default function AdminAdvertFormPage() {
 
   return (
     <div style={styles.container}>
-      <h2 style={{ color: '#1a237e' }}>Create New Advertisement</h2>
+      <h2 style={{ color: '#1a237e' }}>{isEditMode ? 'Edit Advertisement' : 'Create New Advertisement'}</h2>
       <p style={styles.subtitle}>
-        Simplified form — select designation and engagement type to auto-fill salary, qualification, and terms from AI-858/2026.
-        You can override any auto-filled value.
+        {isEditMode
+          ? 'Modify advertisement details below. Changes will be saved immediately.'
+          : 'Simplified form — select designation and engagement type to auto-fill salary, qualification, and terms from AI-858/2026. You can override any auto-filled value.'}
       </p>
 
       {/* Step indicator */}
@@ -381,7 +453,7 @@ export default function AdminAdvertFormPage() {
           <div style={styles.stepContent}>
             <h3 style={styles.stepTitle}>Step 3: Review & Submit</h3>
             <p style={{ color: '#666', marginBottom: 16 }}>
-              Review the advertisement details below. It will be saved as DRAFT.
+              {isEditMode ? 'Review the updated advertisement details below.' : 'Review the advertisement details below. It will be saved as DRAFT.'}
             </p>
 
             <div style={styles.reviewGrid}>
@@ -421,7 +493,9 @@ export default function AdminAdvertFormPage() {
             <div style={styles.navRow}>
               <button type="button" onClick={() => setStep(2)} style={styles.btnOutline}>&larr; Previous</button>
               <button type="submit" disabled={loading} style={styles.submitBtn}>
-                {loading ? 'Creating...' : 'Create Advertisement (as Draft)'}
+                {loading
+                  ? (isEditMode ? 'Saving...' : 'Creating...')
+                  : (isEditMode ? 'Save Changes' : 'Create Advertisement (as Draft)')}
               </button>
             </div>
           </div>

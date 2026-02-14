@@ -124,6 +124,26 @@ export async function createAdvert(req: Request, res: Response) {
   }
 }
 
+export async function updateAdvert(req: Request, res: Response) {
+  try {
+    const input = createAdvertSchema.partial().parse(req.body);
+    const advert = await masterService.updateAdvert(req.params.id, {
+      ...input,
+      domainId: input.domainId || undefined,
+      officeId: input.officeId || undefined,
+      contractStartDate: input.contractStartDate ? new Date(input.contractStartDate) : undefined,
+      lastDateToApply: input.lastDateToApply ? new Date(input.lastDateToApply) : undefined,
+    });
+    res.json({ success: true, data: advert });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ success: false, error: 'Validation failed.', details: error.errors });
+      return;
+    }
+    res.status(400).json({ success: false, error: error.message });
+  }
+}
+
 export async function publishAdvert(req: Request, res: Response) {
   try {
     const advert = await masterService.publishAdvert(req.params.id);

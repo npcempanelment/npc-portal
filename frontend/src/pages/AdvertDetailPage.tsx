@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getAdvertById } from '../services/api';
+import { useAuth } from '../services/AuthContext';
 import type { Advert } from '../types';
 
 const DESIGNATION_LABELS: Record<string, string> = {
@@ -65,6 +66,8 @@ function RichText({ text }: { text: string }) {
 
 export default function AdvertDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const isAdmin = user?.roles?.includes('ADMIN');
   const [advert, setAdvert] = useState<Advert | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -249,24 +252,45 @@ export default function AdvertDetailPage() {
           )}
         </Section>
 
-        {/* How to Apply */}
-        <Section title="How to Apply">
-          <div className="hero-buttons" style={styles.howToApply}>
-            <p style={{ margin: '0 0 12px', fontSize: '0.95rem' }}>
-              Apply online through this portal by clicking the button below. Alternatively, submit your application
-              {advert.applicationEmail ? ` via email to ${advert.applicationEmail}` : ' through the NPC empanelment portal'}
-              {advert.lastDateToApply && ` on or before ${new Date(advert.lastDateToApply).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })} by 3:00 PM`}.
-            </p>
-            {daysLeft !== null && (
-              <p style={{ margin: '0 0 16px', fontWeight: 'bold', color: daysLeft <= 5 ? '#c62828' : '#2e7d32', fontSize: '0.95rem' }}>
-                {daysLeft > 0 ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining to apply` : 'Application deadline has passed'}
+        {/* How to Apply / Admin Actions */}
+        {isAdmin ? (
+          <Section title="Admin Actions">
+            <div className="hero-buttons" style={styles.howToApply}>
+              <p style={{ margin: '0 0 16px', fontSize: '0.95rem', color: '#555' }}>
+                You are viewing this advertisement as an administrator.
+                {advert.status === 'DRAFT' && ' This advert is still in DRAFT status.'}
               </p>
-            )}
-            <Link to={`/apply/contractual/${advert.id}`} style={styles.bigApplyBtn}>
-              Apply for this Position
-            </Link>
-          </div>
-        </Section>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' as const }}>
+                <Link to={`/admin/adverts/${advert.id}/edit`} style={styles.bigApplyBtn}>
+                  Edit Advertisement
+                </Link>
+                {advert.status === 'DRAFT' && (
+                  <Link to="/admin/adverts" style={styles.secondaryBtn}>
+                    Publish from Admin Panel
+                  </Link>
+                )}
+              </div>
+            </div>
+          </Section>
+        ) : (
+          <Section title="How to Apply">
+            <div className="hero-buttons" style={styles.howToApply}>
+              <p style={{ margin: '0 0 12px', fontSize: '0.95rem' }}>
+                Apply online through this portal by clicking the button below. Alternatively, submit your application
+                {advert.applicationEmail ? ` via email to ${advert.applicationEmail}` : ' through the NPC empanelment portal'}
+                {advert.lastDateToApply && ` on or before ${new Date(advert.lastDateToApply).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })} by 3:00 PM`}.
+              </p>
+              {daysLeft !== null && (
+                <p style={{ margin: '0 0 16px', fontWeight: 'bold', color: daysLeft <= 5 ? '#c62828' : '#2e7d32', fontSize: '0.95rem' }}>
+                  {daysLeft > 0 ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining to apply` : 'Application deadline has passed'}
+                </p>
+              )}
+              <Link to={`/apply/contractual/${advert.id}`} style={styles.bigApplyBtn}>
+                Apply for this Position
+              </Link>
+            </div>
+          </Section>
+        )}
       </div>
     </div>
   );
@@ -346,5 +370,10 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'inline-block', padding: '14px 40px', background: '#1a237e', color: '#fff',
     borderRadius: '6px', textDecoration: 'none', fontSize: '1rem', fontWeight: 600,
     boxShadow: '0 2px 8px rgba(26,35,126,0.3)',
+  },
+  secondaryBtn: {
+    display: 'inline-block', padding: '14px 40px', background: '#fff', color: '#1a237e',
+    borderRadius: '6px', textDecoration: 'none', fontSize: '1rem', fontWeight: 600,
+    border: '2px solid #1a237e',
   },
 };
