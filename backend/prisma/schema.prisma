@@ -1,0 +1,652 @@
+// NPC Empanelment & Contractual Engagement Portal
+// Prisma Schema — PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  APPLICANT
+  ADMIN                // Administration Group (GH Admin)
+  SCREENING_MEMBER     // Screening Committee member
+  EMPANELMENT_MEMBER   // Empanelment Committee member
+  SELECTION_MEMBER     // Selection Committee (contractual)
+  DG                   // Director General — Competent Authority
+  IT_ADMIN             // System administration
+}
+
+// Empanelment AI Section 2.3 — auto-classified category
+enum EmpanelmentCategory {
+  ADVISOR
+  SENIOR_CONSULTANT
+  CONSULTANT
+  PROJECT_ASSOCIATE
+  YOUNG_PROFESSIONAL
+}
+
+// AI-858/2026 Section A — types of contractual engagement
+enum EngagementType {
+  FULL_TIME      // A.1
+  PART_TIME      // A.1
+  LUMP_SUM       // A.2
+  REVENUE_SHARE  // A.3
+  RESOURCE_PERSON // A.4
+}
+
+// AI-858 Annex-II-A & II-B — contractual designations
+enum ContractualDesignation {
+  SUPPORT_EXECUTIVE
+  OFFICE_EXECUTIVE
+  ACCOUNTS_EXECUTIVE
+  TECHNICAL_EXECUTIVE
+  LEGAL_EXECUTIVE
+  PROJECT_EXECUTIVE
+  RESEARCH_EXECUTIVE
+  SENIOR_PROFESSIONAL
+  YOUNG_PROFESSIONAL_CONTRACT
+  CONSULTANT_CONTRACT
+  SENIOR_CONSULTANT_CONTRACT
+  ADVISOR_CONTRACT
+  SENIOR_ADVISOR
+  EXPERT_RETIRED
+}
+
+// Empanelment AI §3.3 — empanelment area (from existing NPC portal)
+enum EmpanelmentArea {
+  CONSULTANCY          // Consultancy / Action Research services
+  TRAINING             // Training & Capacity Building services
+  BOTH                 // Both Consultancy & Training
+}
+
+// Application lifecycle statuses
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  AUTO_SCREENED
+  SCREENING_PENDING       // With Screening Committee
+  SCREENING_APPROVED      // Passed Screening Committee
+  SCREENING_REJECTED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  COMMITTEE_EVALUATED     // Empanelment/Selection Committee evaluated
+  RECOMMENDED             // Committee recommended
+  NOT_RECOMMENDED
+  DG_APPROVED             // DG approved
+  DG_REJECTED
+  LETTER_ISSUED           // Empanelment letter or offer letter issued
+  ENGAGEMENT_ACTIVE       // Engagement order issued and active
+  COMPLETED               // Engagement completed
+  CANCELLED
+}
+
+// Advert status
+enum AdvertStatus {
+  DRAFT
+  DG_APPROVED        // AI-858 Annex-I §1 — DG administrative approval
+  PUBLISHED          // AI-858 Annex-I §3
+  CLOSED
+  SELECTION_DONE
+  CANCELLED
+}
+
+// Applicant background type (from existing NPC portal)
+enum ApplicantBackgroundType {
+  GOVERNMENT_GROUP_A   // Serving/retired Group A officer
+  GOVERNMENT_OTHER     // Other government service
+  CPSE                 // Central Public Sector Enterprise
+  AUTONOMOUS_BODY
+  PRIVATE_SECTOR
+  ACADEMIC
+  SELF_EMPLOYED
+  FRESH_GRADUATE
+}
+
+// ─────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  mobile        String?
+  roles         UserRole[]
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  applicantProfile        ApplicantProfile?
+  committeeMemberships    CommitteeMembership[]
+  screeningDecisions      ScreeningDecision[]
+  evaluationScores        EvaluationScore[]
+  auditLogs               AuditLog[]
+}
+
+// ─────────────────────────────────────────────
+// APPLICANT PROFILE
+// ─────────────────────────────────────────────
+
+model ApplicantProfile {
+  id                    String    @id @default(uuid())
+  userId                String    @unique
+  user                  User      @relation(fields: [userId], references: [id])
+
+  // Personal details — from Annex-AF application form
+  fullName              String
+  fatherOrMotherOrSpouseName String?
+  dateOfBirth           DateTime  // Used for age calculation
+  gender                String?
+  aadhaarNumber         String?   // AI-858 Annex-AF
+  panNumber             String?
+  correspondenceAddress String?
+  permanentAddress      String?
+  contactNumbers        String[]  // Multiple contact numbers
+  photoUrl              String?
+
+  // Background — from existing NPC portal
+  backgroundType        ApplicantBackgroundType
+  lastOrganization      String?
+  lastDesignation       String?
+  lastPayLevel          String?   // 7th CPC Pay Level (for govt servants)
+  retirementDate        DateTime? // For retired persons — AI-858 Annex-AF
+  ppoNumber             String?   // Pension Payment Order — AI-858 Annex-AF
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  educations            Education[]
+  experiences           Experience[]
+  certifications        Certification[]
+  documents             Document[]
+  empanelmentApplications   EmpanelmentApplication[]
+  contractualApplications   ContractualApplication[]
+}
+
+model Education {
+  id                String    @id @default(uuid())
+  profileId         String
+  profile           ApplicantProfile @relation(fields: [profileId], references: [id])
+
+  degree            String    // e.g., "B.Tech", "MBA", "Ph.D."
+  field             String    // e.g., "Computer Science"
+  institution       String
+  university        String?
+  yearOfPassing     Int
+  grade             String?   // Percentage / CGPA
+  isPremierInstitute Boolean  @default(false) // ISI, IIT, IIM etc. — Empanelment AI §2.3 YP criteria
+  isDoctorate       Boolean   @default(false) // Empanelment AI §2.3 Advisor criteria
+  isPostGraduation  Boolean   @default(false) // Empanelment AI §2.3 Sr Consultant/Consultant criteria
+
+  createdAt         DateTime  @default(now())
+}
+
+model Experience {
+  id                String    @id @default(uuid())
+  profileId         String
+  profile           ApplicantProfile @relation(fields: [profileId], references: [id])
+
+  organization      String
+  designation       String
+  // AI-858 Annex-AF "APPENDIX" fields
+  payBandOrRemuneration String?  // Pay Band with Grade Pay or CTC
+  dutiesDescription  String?
+
+  startDate         DateTime
+  endDate           DateTime? // null = current
+  isCurrent         Boolean   @default(false)
+
+  // Empanelment AI §2.3 — for Group A service calculation
+  isGroupAService   Boolean   @default(false)
+  payLevel          String?   // 7th CPC level (e.g., "10", "12", "13")
+  isLevel12OrAbove  Boolean   @default(false) // For Advisor/Sr Consultant criteria
+
+  createdAt         DateTime  @default(now())
+}
+
+model Document {
+  id                String    @id @default(uuid())
+  profileId         String
+  profile           ApplicantProfile @relation(fields: [profileId], references: [id])
+
+  documentType      String    // "id_proof", "qualification", "experience", "photo", "ppo"
+  fileName          String
+  fileUrl           String
+  uploadedAt        DateTime  @default(now())
+}
+
+model Certification {
+  id                String    @id @default(uuid())
+  profileId         String
+  profile           ApplicantProfile @relation(fields: [profileId], references: [id])
+
+  name              String    // e.g., "PMP", "Six Sigma Black Belt"
+  issuingBody       String    // e.g., "PMI", "ASQ"
+  yearObtained      Int?
+  certificateNumber String?
+  validUntil        DateTime?
+
+  createdAt         DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────
+// MASTER DATA
+// ─────────────────────────────────────────────
+
+// Domains — from existing NPC portal + Empanelment AI §1
+model Domain {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  code        String    @unique // e.g., "IT", "IE", "ABG"
+  isActive    Boolean   @default(true)
+
+  subDomains  SubDomain[]
+  empanelmentApplications EmpanelmentApplication[]
+  adverts     Advert[]
+}
+
+model SubDomain {
+  id          String    @id @default(uuid())
+  domainId    String
+  domain      Domain    @relation(fields: [domainId], references: [id])
+  name        String
+  isActive    Boolean   @default(true)
+
+  empanelmentApplications EmpanelmentApplication[]
+
+  @@unique([domainId, name])
+}
+
+// NPC offices — from existing NPC portal
+model NpcOffice {
+  id          String    @id @default(uuid())
+  name        String    // e.g., "NPC HQ New Delhi"
+  city        String
+  state       String
+  isHQ        Boolean   @default(false)
+  isActive    Boolean   @default(true)
+
+  empanelmentApplications EmpanelmentApplicationOfficePreference[]
+  adverts     Advert[]
+}
+
+// Eligibility rules — configurable by Admin, seeded from AI matrices
+// Rule from Empanelment AI Section 2.3 + AI-858 Annex-II-A/B
+model EligibilityRule {
+  id                    String    @id @default(uuid())
+  ruleType              String    // "EMPANELMENT" or "CONTRACTUAL"
+
+  // For empanelment
+  empanelmentCategory   EmpanelmentCategory?
+
+  // For contractual
+  contractualDesignation ContractualDesignation?
+
+  // Criteria thresholds — derived from AI matrices
+  minExperienceYears    Float?
+  maxExperienceYears    Float?
+  minGroupAYears        Float?    // Empanelment AI §2.3
+  minLevel12Years       Float?    // Empanelment AI §2.3
+  requiresDoctorate     Boolean   @default(false) // Empanelment AI §2.3 Advisor (open market)
+  requiresPostGrad      Boolean   @default(false) // Empanelment AI §2.3 Sr Consultant/Consultant
+  requiresPremierInst   Boolean   @default(false) // Empanelment AI §2.3 Young Professional
+  maxAge                Int?      // Empanelment AI §2.3 YP: 35; AI-858 Annex-II-B: 65
+  minQualification      String?   // "CLASS_XII", "GRADUATE", "POST_GRADUATE", "DOCTORATE", "ITI", "LAW", "PROFESSIONAL"
+
+  // Remuneration — AI-858 Annex-II-A & II-B
+  remunerationJson      Json?     // Stores experience→remuneration mapping
+
+  description           String?   // Human-readable rule description
+  isActive              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// EMPANELMENT APPLICATIONS
+// ─────────────────────────────────────────────
+
+// Empanelment AI — continuous empanelment application
+model EmpanelmentApplication {
+  id                    String    @id @default(uuid())
+  applicationNumber     String    @unique @default(uuid()) // System-generated
+  profileId             String
+  profile               ApplicantProfile @relation(fields: [profileId], references: [id])
+
+  // Domain & sub-domain selection
+  domainId              String
+  domain                Domain    @relation(fields: [domainId], references: [id])
+  subDomainId           String?
+  subDomain             SubDomain? @relation(fields: [subDomainId], references: [id])
+
+  empanelmentArea       EmpanelmentArea // Consultancy / Training / Both
+
+  // Auto-screening results — Rule from Empanelment AI Section 2.3
+  autoScreenCategory    EmpanelmentCategory? // Computed provisional category
+  autoScreenEligible    Boolean?
+  autoScreenReasons     String[]  // Array of reasons/explanations
+  computedTotalExpYears Float?    // Computed total experience
+  computedGroupAYears   Float?    // Computed Group-A service years
+  computedLevel12Years  Float?    // Computed Level-12+ service years
+  computedAge           Int?      // Age at time of application
+  hasDoctorate          Boolean   @default(false)
+  hasPostGrad           Boolean   @default(false)
+  hasRelevantDegree     Boolean   @default(false)
+
+  status                ApplicationStatus @default(DRAFT)
+  submittedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  officePreferences     EmpanelmentApplicationOfficePreference[]
+  screeningDecision     ScreeningDecision?
+  evaluationScores      EvaluationScore[]
+  empanelmentRecord     EmpanelmentRecord?
+}
+
+model EmpanelmentApplicationOfficePreference {
+  id              String    @id @default(uuid())
+  applicationId   String
+  application     EmpanelmentApplication @relation(fields: [applicationId], references: [id])
+  officeId        String
+  office          NpcOffice @relation(fields: [officeId], references: [id])
+  preferenceOrder Int       @default(1)
+
+  @@unique([applicationId, officeId])
+}
+
+// ─────────────────────────────────────────────
+// CONTRACTUAL ENGAGEMENT — AI-858/2026
+// ─────────────────────────────────────────────
+
+// Advertisements — AI-858 Annex-I §3, Annex-A template
+model Advert {
+  id                    String    @id @default(uuid())
+  advertNumber          String    @unique
+  title                 String
+  description           String?
+
+  // AI-858 Annex-I §1 — requisition context
+  requisitionType       String    // "PROJECT", "ADMIN_FINANCE", "NEW_PROJECT_IDEAS"
+  projectName           String?   // For project-based requisitions
+  projectValue          Float?    // For lump-sum % calculation
+
+  domainId              String?
+  domain                Domain?   @relation(fields: [domainId], references: [id])
+  officeId              String?
+  office                NpcOffice? @relation(fields: [officeId], references: [id])
+
+  // Post details — Annex-A advertisement template
+  designation           ContractualDesignation
+  engagementType        EngagementType
+  numberOfPosts         Int       @default(1)
+  placeOfDeployment     String?
+
+  // Annex-A: Functional role, work responsibilities, eligibility
+  functionalRole        String?   // Brief role description
+  workResponsibilities  String?   // Detailed duties (rich text / bullet points)
+  eligibilityCriteria   String?   // Full eligibility text for display
+
+  // Eligibility criteria — AI-858 Annex-II-A/B
+  minQualification      String?
+  qualificationDetails  String?   // Detailed qualification text for public display
+  minExperienceYears    Float?
+  maxAge                Int?      // AI-858 Annex-II-B: 65 for most
+  specificRequirements  String?   // Free-form additional criteria
+  desirableSkills       String?   // Nice-to-have skills
+
+  // Remuneration — AI-858 §C
+  remunerationMin       Float?
+  remunerationMax       Float?
+  remunerationBasis     String?   // "MONTHLY", "DAILY", "LUMP_SUM"
+  remunerationNote      String?   // e.g., "As per AI-858 Annex-II-A"
+
+  // Contract period
+  contractPeriodMonths  Int?
+  contractStartDate     DateTime?
+
+  // Terms & Conditions — Annex-A template
+  termsAndConditions    String?   // Structured terms text
+  workingHoursNote      String?   // e.g., "Normal office timings"
+  travelRequired        Boolean   @default(false)
+  travelNote            String?   // TA/DA details
+
+  // Publication — AI-858 Annex-I §3
+  publishDate           DateTime?
+  lastDateToApply       DateTime? // Min 14 days from publish — AI-858 Annex-I §3
+  applicationEmail      String?   // AI-858 Annex-I §4
+
+  // General conditions — Annex-A
+  generalConditions     String?   // Cancellation rights, document verification etc.
+
+  status                AdvertStatus @default(DRAFT)
+  dgApprovalDate        DateTime?  // AI-858 Annex-I §1
+  createdByUserId       String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  applications          ContractualApplication[]
+}
+
+// Contractual application — linked to specific advert
+model ContractualApplication {
+  id                    String    @id @default(uuid())
+  applicationNumber     String    @unique @default(uuid())
+  profileId             String
+  profile               ApplicantProfile @relation(fields: [profileId], references: [id])
+  advertId              String
+  advert                Advert    @relation(fields: [advertId], references: [id])
+
+  // Auto-screening results — AI-858 Annex-II-A/B
+  autoScreenEligible    Boolean?
+  autoScreenReasons     String[]
+  computedTotalExpYears Float?
+  computedAge           Int?
+  meetsQualification    Boolean?
+  meetsExperience       Boolean?
+  meetsAge              Boolean?
+
+  // Suggested remuneration — AI-858 §C.1
+  suggestedRemunerationMin Float?
+  suggestedRemunerationMax Float?
+
+  status                ApplicationStatus @default(DRAFT)
+  submittedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  screeningDecision     ScreeningDecision?
+  evaluationScores      EvaluationScore[]
+  engagementOrder       EngagementOrder?
+}
+
+// ─────────────────────────────────────────────
+// COMMITTEES & DECISIONS
+// ─────────────────────────────────────────────
+
+// Committees — Empanelment AI §2.1, §3.1; AI-858 Annex-I §4, §5
+model Committee {
+  id            String    @id @default(uuid())
+  name          String
+  committeeType String    // "SCREENING_EMPANELMENT", "EMPANELMENT", "SCREENING_CONTRACTUAL", "SELECTION"
+  domainId      String?   // Empanelment Committee is domain-specific — Empanelment AI §3.1
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  members       CommitteeMembership[]
+  meetings      CommitteeMeeting[]
+}
+
+model CommitteeMembership {
+  id            String    @id @default(uuid())
+  committeeId   String
+  committee     Committee @relation(fields: [committeeId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+
+  // Empanelment AI §2.1, §3.1
+  role          String    // "CHAIRPERSON", "MEMBER", "MEMBER_SECRETARY"
+  isActive      Boolean   @default(true)
+  appointedDate DateTime  @default(now())
+
+  @@unique([committeeId, userId])
+}
+
+model CommitteeMeeting {
+  id            String    @id @default(uuid())
+  committeeId   String
+  committee     Committee @relation(fields: [committeeId], references: [id])
+  meetingDate   DateTime
+  venue         String?
+  isOnline      Boolean   @default(false)
+  agenda        String?
+  minutesOfMeeting String? // Empanelment AI §3.2 — minutes must include evaluation criteria
+  quorumMet     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  screeningDecisions ScreeningDecision[]
+  evaluationScores   EvaluationScore[]
+}
+
+// Screening decisions — Empanelment AI §2.2; AI-858 Annex-I §4
+model ScreeningDecision {
+  id                      String    @id @default(uuid())
+  meetingId               String
+  meeting                 CommitteeMeeting @relation(fields: [meetingId], references: [id])
+  decidedByUserId         String
+  decidedBy               User      @relation(fields: [decidedByUserId], references: [id])
+
+  // Linked to either empanelment or contractual application
+  empanelmentApplicationId String? @unique
+  empanelmentApplication   EmpanelmentApplication? @relation(fields: [empanelmentApplicationId], references: [id])
+  contractualApplicationId String? @unique
+  contractualApplication   ContractualApplication? @relation(fields: [contractualApplicationId], references: [id])
+
+  decision                String    // "APPROVED", "REJECTED", "REFERRED_BACK"
+  // Empanelment AI §2.2 — validate category
+  confirmedCategory       EmpanelmentCategory?
+  remarks                 String?
+  decidedAt               DateTime  @default(now())
+}
+
+// Evaluation scores — Empanelment AI §3.2; AI-858 §C.1
+model EvaluationScore {
+  id                      String    @id @default(uuid())
+  meetingId               String
+  meeting                 CommitteeMeeting @relation(fields: [meetingId], references: [id])
+  evaluatorUserId         String
+  evaluator               User      @relation(fields: [evaluatorUserId], references: [id])
+
+  // Linked to either empanelment or contractual application
+  empanelmentApplicationId String?
+  empanelmentApplication   EmpanelmentApplication? @relation(fields: [empanelmentApplicationId], references: [id])
+  contractualApplicationId String?
+  contractualApplication   ContractualApplication? @relation(fields: [contractualApplicationId], references: [id])
+
+  // Empanelment AI §3.2 — evaluation areas
+  technicalKnowledge      Float?    // 0-100
+  communicationSkills     Float?
+  problemSolving          Float?
+  npcAlignment            Float?
+  relevantExperience      Float?
+
+  totalScore              Float?    // Computed total percentage
+  remarks                 String?
+  evaluatedAt             DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────
+// FINAL RECORDS
+// ─────────────────────────────────────────────
+
+// Empanelment record — Empanelment AI §4
+model EmpanelmentRecord {
+  id                      String    @id @default(uuid())
+  applicationId           String    @unique
+  application             EmpanelmentApplication @relation(fields: [applicationId], references: [id])
+
+  empanelmentNumber       String    @unique
+  category                EmpanelmentCategory
+  domainName              String
+  subDomainName           String?
+  empanelmentArea         EmpanelmentArea
+
+  // Empanelment AI §4 — valid for 3 years
+  issueDate               DateTime
+  validUntil              DateTime  // issueDate + 3 years
+  dgApprovalDate          DateTime
+  letterIssuedDate        DateTime? // §3.3: within 7 working days of DG approval
+  letterUrl               String?
+
+  isActive                Boolean   @default(true)
+  renewalDueDate          DateTime? // §3.3: initiate renewal 3 months before expiry
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+// Engagement order — AI-858 Annex-B
+model EngagementOrder {
+  id                      String    @id @default(uuid())
+  applicationId           String    @unique
+  application             ContractualApplication @relation(fields: [applicationId], references: [id])
+
+  orderNumber             String    @unique
+  designation             ContractualDesignation
+  engagementType          EngagementType
+
+  // AI-858 §C.1 — remuneration based on Selection Committee marks
+  finalRemuneration       Float
+  remunerationBasis       String    // "MONTHLY", "DAILY", "LUMP_SUM"
+  selectionCommitteeMarks Float?    // >80% = max, 60-80% = 90% of max
+
+  // AI-858 Annex-B — engagement terms
+  contractStartDate       DateTime
+  contractEndDate         DateTime
+  placeOfDeployment       String
+  dutiesDescription       String?
+  supervisingOfficer      String?
+
+  dgApprovalDate          DateTime
+  offerLetterDate         DateTime?
+  offerLetterUrl          String?
+  engagementOrderDate     DateTime?
+  engagementOrderUrl      String?
+
+  // AI-858 §E — leave entitlement
+  leaveEntitlementDays    Int       @default(12)
+
+  isActive                Boolean   @default(true)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id            String    @id @default(uuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  action        String    // e.g., "APPLICATION_SUBMITTED", "SCREENING_DECISION", "DG_APPROVAL"
+  entityType    String    // "EmpanelmentApplication", "ContractualApplication", etc.
+  entityId      String
+  details       Json?
+  ipAddress     String?
+  createdAt     DateTime  @default(now())
+}
