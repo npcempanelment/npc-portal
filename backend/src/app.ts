@@ -44,8 +44,19 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ success: false, error: 'Internal server error.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`NPC Portal API running on port ${PORT}`);
-});
+// Auto-seed on first deploy
+import { autoSeed } from './scripts/auto-seed';
+autoSeed()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`NPC Portal API running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Auto-seed failed:', err);
+    app.listen(PORT, () => {
+      console.log(`NPC Portal API running on port ${PORT} (seed failed)`);
+    });
+  });
 
 export default app;
