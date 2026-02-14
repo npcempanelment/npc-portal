@@ -6,10 +6,16 @@
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
+import fs from 'fs';
+
+const uploadsPath = path.join(__dirname, '../../uploads');
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
+    if (!fs.existsSync(uploadsPath)) {
+      fs.mkdirSync(uploadsPath, { recursive: true });
+    }
+    cb(null, uploadsPath);
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);

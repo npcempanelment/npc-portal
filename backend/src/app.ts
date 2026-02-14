@@ -8,7 +8,15 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import routes from './routes';
+
+// Ensure uploads directory exists before multer tries to write to it
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Created uploads directory:', uploadsDir);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;

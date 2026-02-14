@@ -230,16 +230,26 @@ export default function ContractualApplicationPage() {
       const result = await submitContractualFull({ profile: profileData, advertId, empanelmentOptIn });
 
       // Upload documents with auto-numbered types
-      if (photoFile) try { await uploadDocument(photoFile, 'PHOTO'); } catch {}
-      if (idProofFile) try { await uploadDocument(idProofFile, 'ID-PROOF'); } catch {}
+      const uploadErrors: string[] = [];
+      const tryUpload = async (file: File, type: string) => {
+        try { await uploadDocument(file, type); } catch (e: any) {
+          console.error(`Document upload failed (${type}):`, e);
+          uploadErrors.push(type);
+        }
+      };
+      if (photoFile) await tryUpload(photoFile, 'PHOTO');
+      if (idProofFile) await tryUpload(idProofFile, 'ID-PROOF');
       for (let i = 0; i < educations.length; i++) {
-        if (educations[i].docFile) try { await uploadDocument(educations[i].docFile!, `EDU-${i+1}`); } catch {}
+        if (educations[i].docFile) await tryUpload(educations[i].docFile!, `EDU-${i+1}`);
       }
       for (let i = 0; i < experiences.length; i++) {
-        if (experiences[i].docFile) try { await uploadDocument(experiences[i].docFile!, `EXP-${i+1}`); } catch {}
+        if (experiences[i].docFile) await tryUpload(experiences[i].docFile!, `EXP-${i+1}`);
       }
       for (let i = 0; i < certifications.length; i++) {
-        if (certifications[i].docFile) try { await uploadDocument(certifications[i].docFile!, `CERT-${i+1}`); } catch {}
+        if (certifications[i].docFile) await tryUpload(certifications[i].docFile!, `CERT-${i+1}`);
+      }
+      if (uploadErrors.length > 0) {
+        setError(`Application submitted but ${uploadErrors.length} document(s) failed to upload (${uploadErrors.join(', ')}). Please re-upload from your profile.`);
       }
 
       if (result.success) {
