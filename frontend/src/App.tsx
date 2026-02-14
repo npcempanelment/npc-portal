@@ -17,6 +17,14 @@ import ScreeningDashboardPage from './pages/ScreeningDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdvertDetailPage from './pages/AdvertDetailPage';
 import AdminAdvertFormPage from './pages/AdminAdvertFormPage';
+import AdminAdvertsPage from './pages/AdminAdvertsPage';
+import AdminDomainsPage from './pages/AdminDomainsPage';
+import AdminOfficesPage from './pages/AdminOfficesPage';
+import AdminCommitteesPage from './pages/AdminCommitteesPage';
+import AdminEligibilityPage from './pages/AdminEligibilityPage';
+import AdminReportsPage from './pages/AdminReportsPage';
+import AdminLettersPage from './pages/AdminLettersPage';
+import AdminPublicListPage from './pages/AdminPublicListPage';
 import ProfilePage from './pages/ProfilePage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 
@@ -46,7 +54,15 @@ export default function App() {
 
             {/* Admin */}
             <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/adverts" element={<AdminAdvertsPage />} />
             <Route path="/admin/adverts/new" element={<AdminAdvertFormPage />} />
+            <Route path="/admin/domains" element={<AdminDomainsPage />} />
+            <Route path="/admin/offices" element={<AdminOfficesPage />} />
+            <Route path="/admin/committees" element={<AdminCommitteesPage />} />
+            <Route path="/admin/eligibility" element={<AdminEligibilityPage />} />
+            <Route path="/admin/reports" element={<AdminReportsPage />} />
+            <Route path="/admin/letters" element={<AdminLettersPage />} />
+            <Route path="/admin/public-list" element={<AdminPublicListPage />} />
 
             {/* Catch-all */}
             <Route path="*" element={<div style={{ padding: '48px', textAlign: 'center' }}><h2>Page Not Found</h2></div>} />
